@@ -8,6 +8,7 @@ from app.models.user import User
 from app.schemas.user_schema import UserResponse
 
 from app.core.security import hash_password
+from app.core.permissions import require_admin
 
 import os
 import shutil
@@ -17,6 +18,7 @@ router = APIRouter(
     tags=["Users"]
 )
 
+
 @router.post("/register")
 def register_user(
     full_name: str = Form(...),
@@ -24,7 +26,8 @@ def register_user(
     password: str = Form(...),
     role_id: int = Form(...),
     face_image: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
 ):
     
     existing_user = db.query(User).filter(
@@ -100,12 +103,15 @@ def register_user(
     
 
 @router.get("/", response_model=list[UserResponse])
-def list_users(db: Session = Depends(get_db)):
+def list_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
+):
     users = db.query(User).filter(User.is_active == True).all()
     return users
 
 @router.get("/{user_id}", response_model=UserResponse)
-def get_user(user_id: int, db: Session = Depends(get_db)):
+def get_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     user = db.query(User).filter(
         User.id == user_id, User.is_active == True
     ).first()
@@ -119,7 +125,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     return user
 
 @router.delete("/{user_id}/deactivate")
-def deactivate_user(user_id: int, db: Session = Depends(get_db)):
+def deactivate_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     user = db.query(User).filter(
         User.id == user_id, User.is_active == True
     ).first()
@@ -144,7 +150,7 @@ def deactivate_user(user_id: int, db: Session = Depends(get_db)):
         )
 
 @router.patch("/{user_id}/activate")
-def activate_user(user_id: int, db: Session = Depends(get_db)):
+def activate_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     user = db.query(User).filter(
         User.id == user_id, User.is_active == False
     ).first()
@@ -177,7 +183,8 @@ def update_user(
     password: str = Form(None),
     role_id: int = Form(None),
     face_image: UploadFile = File(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
 ):
     user = db.query(User).filter(
         User.id == user_id, User.is_active == True

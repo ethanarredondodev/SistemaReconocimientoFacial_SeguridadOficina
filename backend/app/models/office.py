@@ -9,3 +9,7 @@ class Office(Base):
     name = Column(String, unique=True, nullable=False)
     description = Column(String, nullable=True)
     is_active = Column(Boolean, default=True, nullable=False, server_default='true')
+
+    role_offices = relationship("RoleOffice", back_populates="office")
+    user_offices = relationship("UserOffice", back_populates="office")
+    access_logs = relationship("AccessLog", back_populates="office")

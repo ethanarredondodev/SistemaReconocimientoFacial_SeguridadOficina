@@ -1,3 +1,4 @@
+from app.models.user import User
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -5,6 +6,7 @@ from sqlalchemy import func
 from app.schemas.role_schema import RoleCreate, RoleResponse, RoleUpdate
 from app.database import get_db
 from app.models.role import Role
+from app.core.permissions import require_admin
 
 router = APIRouter(
     prefix="/roles",
@@ -12,7 +14,7 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=RoleResponse)
-def create_role(role: RoleCreate, db: Session = Depends(get_db)):
+def create_role(role: RoleCreate, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
 
     existing_role = db.query(Role).filter(
         Role.name == role.name
@@ -37,12 +39,12 @@ def create_role(role: RoleCreate, db: Session = Depends(get_db)):
     
 
 @router.get("/", response_model=list[RoleResponse])
-def get_roles(db: Session = Depends(get_db)):
+def get_roles(db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     roles = db.query(Role).filter(Role.is_active == True).all()
     return roles
 
 @router.get("/{role_id}", response_model=RoleResponse)
-def get_role(role_id: int, db: Session = Depends(get_db)):
+def get_role(role_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     role = db.query(Role).filter(
         Role.id == role_id,
         Role.is_active == True
@@ -57,7 +59,7 @@ def get_role(role_id: int, db: Session = Depends(get_db)):
     return role
 
 @router.patch("/{role_id}", response_model=RoleResponse)
-def update_role(role_id: int, update_data: RoleUpdate, db: Session = Depends(get_db)):
+def update_role(role_id: int, update_data: RoleUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
 
     role = db.query(Role).filter(
         Role.id == role_id,
@@ -101,7 +103,7 @@ def update_role(role_id: int, update_data: RoleUpdate, db: Session = Depends(get
         )
 
 @router.delete("/{role_id}/deactivate")
-def deactivate_role(role_id: int, db: Session = Depends(get_db)):
+def deactivate_role(role_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
 
     role = db.query(Role).filter(
         Role.id == role_id,
@@ -119,7 +121,12 @@ def deactivate_role(role_id: int, db: Session = Depends(get_db)):
             status_code=400,
             detail="Cannot deactivate role because it is assigned to users"
         )
-
+    if role.role_offices:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot deactivate role because it is assigned to offices"
+        )
+    
     role.is_active = False
 
     try:

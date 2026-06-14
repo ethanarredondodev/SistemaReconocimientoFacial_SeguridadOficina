@@ -13,6 +13,12 @@ from app.routes.auth_routes import router as auth_router
 from app.routes.role_routes import router as role_router
 from app.routes.office_routes import router as office_router
 
+from app.routes.role_office_routes import router as role_office_router
+from app.routes.user_office_routes import router as user_office_router
+from app.routes.access_log_routes import router as access_log_router
+
+from app.routes.face_access_routes import router as face_access_router
+
 app = FastAPI(
     title="COMPRAFACIL ACCESS API",
     version="1.0.0"
@@ -22,6 +28,11 @@ app.include_router(user_router)
 app.include_router(auth_router)
 app.include_router(role_router)
 app.include_router(office_router)
+app.include_router(role_office_router)
+app.include_router(user_office_router)
+app.include_router(access_log_router)
+app.include_router(face_access_router)
+
 
 @app.get("/")
 def root():

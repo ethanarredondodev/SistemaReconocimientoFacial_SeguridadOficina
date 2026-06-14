@@ -11,3 +11,4 @@ class Role(Base):
     is_active = Column(Boolean, nullable=False, server_default='true')
 
     users = relationship("User", back_populates="role")
+    role_offices = relationship("RoleOffice", back_populates="role")

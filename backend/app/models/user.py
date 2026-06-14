@@ -14,3 +14,5 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     role = relationship("Role", back_populates="users")
+    user_offices = relationship("UserOffice", back_populates="user")
+    access_logs = relationship("AccessLog", back_populates="user")
