@@ -77,8 +77,6 @@ def verify_access(
         confidence=float(confidence)
     )
 
-    print(log.user_id, log.office_id, log.access_result, log.confidence)
-
     try:
         db.add(log)
         db.commit()
