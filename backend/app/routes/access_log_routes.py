@@ -29,7 +29,6 @@ def get_access_logs(
     current_user: User = Depends(require_admin)
 ):
     query = db.query(AccessLog)
-
     if user_id is not None and include_unknown:
         query = query.filter(
             or_(
@@ -75,38 +74,7 @@ def get_access_log(access_log_id: int, db: Session = Depends(get_db), current_us
     if not access_log:
         raise HTTPException(
             status_code=404, 
-            detail="Access log not found"
+            detail="Log de acceso no encontrado"
         )
     
     return access_log
-
-''' 
-@router.get("/user/{user_id}", response_model=list[AccessLogResponse])
-def get_access_logs_by_user(user_id: int, db: Session = Depends(get_db)):
-    access_logs = db.query(AccessLog).filter(
-        AccessLog.user_id == user_id
-    ).all()
-    return access_logs
-
-
-@router.get("/office/{office_id}", response_model=list[AccessLogResponse])
-def get_access_logs_by_office(office_id: int, db: Session = Depends(get_db)):
-    access_logs = db.query(AccessLog).filter(
-        AccessLog.office_id == office_id
-    ).all()
-    return access_logs
-
-@router.get("/granted", response_model=list[AccessLogResponse])
-def get_granted_access_logs(db: Session = Depends(get_db)):
-    access_logs = db.query(AccessLog).filter(
-        AccessLog.access_result == "Permitido"
-    ).all()
-    return access_logs
-
-@router.get("/denied", response_model=list[AccessLogResponse])
-def get_denied_access_logs(db: Session = Depends(get_db)):
-    access_logs = db.query(AccessLog).filter(
-        AccessLog.access_result == "Denegado"
-    ).all()
-    return access_logs
-'''

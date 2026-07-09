@@ -23,7 +23,7 @@ def create_role(role: RoleCreate, db: Session = Depends(get_db), current_user: U
     if existing_role:
         raise HTTPException(
             status_code=400,
-            detail="Role already exists"
+            detail="El role ya existe"
         )
 
     new_role = Role(
@@ -53,7 +53,7 @@ def get_role(role_id: int, db: Session = Depends(get_db), current_user: User = D
     if not role:
         raise HTTPException(
             status_code=404,
-            detail="Role not found"
+            detail="Role no encontrado"
         )
     
     return role
@@ -69,7 +69,7 @@ def update_role(role_id: int, update_data: RoleUpdate, db: Session = Depends(get
     if not role:
         raise HTTPException(
             status_code=404,
-            detail="Role not found"
+            detail="Role no encontrado"
         )
 
     if update_data.name is not None and update_data.name.strip() != "":
@@ -82,7 +82,7 @@ def update_role(role_id: int, update_data: RoleUpdate, db: Session = Depends(get
         if existing_name:
             raise HTTPException(
                 status_code=400,
-                detail="Role name already exists"
+                detail="El nombre del role ya existe"
             )
         
         role.name = update_data.name
@@ -99,7 +99,7 @@ def update_role(role_id: int, update_data: RoleUpdate, db: Session = Depends(get
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An error occurred while updating the role"
+            detail="Ocurrió un error mientras se actualizaba el role"
         )
 
 @router.delete("/{role_id}/deactivate")
@@ -113,28 +113,28 @@ def deactivate_role(role_id: int, db: Session = Depends(get_db), current_user: U
     if not role:
         raise HTTPException(
             status_code=404,
-            detail="Role not found"
+            detail="Role no encontrado"
         )
 
     if role.users:
         raise HTTPException(
             status_code=400,
-            detail="Cannot deactivate role because it is assigned to users"
+            detail="No se puede desactivar el role porque está asignado a usuarios"
         )
     if role.role_offices:
         raise HTTPException(
             status_code=400,
-            detail="Cannot deactivate role because it is assigned to offices"
+            detail="No se puede desactivar el role porque está asignado a oficinas"
         )
     
     role.is_active = False
 
     try:
         db.commit()
-        return {"detail": "Role deactivated successfully"}
+        return {"detail": "Role desactivado exitosamente"}
     except Exception:
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An error occurred while deactivating the role"
+            detail="Ocurrió un error mientras se desactivaba el role"
         )

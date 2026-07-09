@@ -3,6 +3,7 @@ from pydantic import BaseModel
 class RoleResponse(BaseModel):
     id: int
     name: str
+    is_active: bool
     description: str | None = None
 
     class Config:

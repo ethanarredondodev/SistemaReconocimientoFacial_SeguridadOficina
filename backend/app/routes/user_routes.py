@@ -31,13 +31,14 @@ def register_user(
 ):
     
     existing_user = db.query(User).filter(
-        User.email == email
+        User.email == email,
+        User.is_active == True
     ).first()
 
     if existing_user:
         raise HTTPException(
             status_code=400,
-            detail="Email already exists"
+            detail="El email ya está registrado"
         )
 
 
@@ -48,7 +49,7 @@ def register_user(
     if not role_exists:
         raise HTTPException(
             status_code=400,
-            detail="Role does not exist"
+            detail="El role no existe"
         )
 
 
@@ -83,7 +84,7 @@ def register_user(
         db.commit()
 
         return {
-            "message": "User registered successfully",
+            "message": "Usuario registrado exitosamente",
             "user_id": new_user.id,
             "full_name": new_user.full_name,
             "email": new_user.email,
@@ -98,7 +99,7 @@ def register_user(
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An error occurred while registering the user"
+            detail="Ocurrió un error mientras se registraba el usuario"
         )
     
 
@@ -119,7 +120,7 @@ def get_user(user_id: int, db: Session = Depends(get_db), current_user: User = D
     if not user:
         raise HTTPException(
             status_code=404,
-            detail="User not found"
+            detail="Usuario no encontrado"
         )
 
     return user
@@ -133,21 +134,29 @@ def deactivate_user(user_id: int, db: Session = Depends(get_db), current_user: U
     if not user:
         raise HTTPException(
             status_code=404,
-            detail="User not found"
+            detail="Usuario no encontrado"
         )
 
+    if user.role.name == "admin":
+        admin_count = db.query(User).filter(
+            User.is_active == True,
+            User.role.has(name="admin")
+        ).count()
+
+        if admin_count <= 1:
+            raise HTTPException(
+                status_code=400,
+                detail="No se puede eliminar el único administrador del sistema"
+            )
+
+    user.is_active = False
+
     try:
-        user.is_active = False
         db.commit()
-        return {
-            "message": "User deactivated successfully"
-        }
+        return {"detail": "Usuario desactivado exitosamente"}
     except Exception:
         db.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail="An error occurred while deactivating the user"
-        )
+        raise HTTPException(status_code=500, detail="Error al eliminar el usuario")
 
 @router.patch("/{user_id}/activate")
 def activate_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
@@ -158,20 +167,20 @@ def activate_user(user_id: int, db: Session = Depends(get_db), current_user: Use
     if not user:
         raise HTTPException(
             status_code=404,
-            detail="User not found"
+            detail="Usuario no encontrado"
         )
 
     try:
         user.is_active = True
         db.commit()
         return {
-            "message": "User activated successfully"
+            "message": "Usuario activado exitosamente"
         }
     except Exception:
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An error occurred while activating the user"
+            detail="Ocurrió un error mientras se activaba el usuario"
         )
 
 
@@ -193,7 +202,7 @@ def update_user(
     if not user:
         raise HTTPException(
             status_code=404,
-            detail="User not found"
+            detail="Usuario no encontrado"
         )
 
     if full_name is not None:
@@ -209,7 +218,7 @@ def update_user(
         if existing_email:
             raise HTTPException(
                 status_code=400,
-                detail="Email already exists"
+                detail="El email ya está registrado"
             )
         
         user.email = email
@@ -225,7 +234,7 @@ def update_user(
         if not role_exists:
             raise HTTPException(
                 status_code=400,
-                detail="Role does not exist"
+                detail="El role no existe"
             )
         user.role_id = role_id
 
@@ -250,5 +259,5 @@ def update_user(
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="An error occurred while updating the user"
+            detail="Ocurrió un error mientras se actualizaba el usuario"
         )

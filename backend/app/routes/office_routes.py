@@ -22,7 +22,7 @@ def create_office(office: OfficeCreate, db: Session = Depends(get_db), current_u
     ).first()
 
     if existing_office:
-        raise HTTPException(status_code=400, detail="Office with that name already exists")
+        raise HTTPException(status_code=400, detail="Ya existe una oficina con ese nombre")
 
     new_office = Office(**office.model_dump())
 
@@ -33,11 +33,11 @@ def create_office(office: OfficeCreate, db: Session = Depends(get_db), current_u
         return new_office
     except Exception:
         db.rollback()
-        raise HTTPException(status_code=500, detail="Failed to create office")
+        raise HTTPException(status_code=500, detail="Fallo al crear la oficina")
     
 
 @router.get("/", response_model=list[OfficeResponse])
-def get_offices(db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+def get_offices(db: Session = Depends(get_db)):
     offices = db.query(Office).filter(Office.is_active == True).all()
     return offices
 
@@ -49,7 +49,7 @@ def get_office(office_id: int, db: Session = Depends(get_db), current_user: User
     ).first()
 
     if not office:
-        raise HTTPException(status_code=404, detail="Office not found")
+        raise HTTPException(status_code=404, detail="Oficina no encontrada")
     return office
 
 @router.patch("/{office_id}", response_model=OfficeResponse)
@@ -60,7 +60,7 @@ def update_office(office_id: int, updated_office: OfficeUpdate, db: Session = De
     ).first()
 
     if not office:
-        raise HTTPException(status_code=404, detail="Office not found")
+        raise HTTPException(status_code=404, detail="Oficina no encontrada")
 
     if updated_office.name is not None and updated_office.name != office.name:
         existing_office = db.query(Office).filter(
@@ -70,7 +70,7 @@ def update_office(office_id: int, updated_office: OfficeUpdate, db: Session = De
         ).first()
 
         if existing_office:
-            raise HTTPException(status_code=400, detail="Another office with that name already exists")
+            raise HTTPException(status_code=400, detail="Ya existe una oficina con ese nombre")
         office.name = updated_office.name
     
     if updated_office.description is not None:
@@ -82,7 +82,7 @@ def update_office(office_id: int, updated_office: OfficeUpdate, db: Session = De
         return office
     except Exception:
         db.rollback()
-        raise HTTPException(status_code=500, detail="Failed to update office")
+        raise HTTPException(status_code=500, detail="Fallo al actualizar la oficina")
 
 
 @router.delete("/{office_id}/deactivate", response_model=OfficeResponse)
@@ -93,17 +93,17 @@ def deactivate_office(office_id: int, db: Session = Depends(get_db), current_use
     ).first()
 
     if not existing_office:
-        raise HTTPException(status_code=404, detail="Office not found")
+        raise HTTPException(status_code=404, detail="Oficina no encontrada")
 
     if existing_office.role_offices:
         raise HTTPException(
             status_code=400,
-            detail="Cannot deactivate office because it is assigned to roles"
+            detail="No se puede desactivar la oficina porque está asignada a roles"
         )
     if existing_office.user_offices:
         raise HTTPException(
             status_code=400,
-            detail="Cannot deactivate office because it is assigned to users"
+            detail="No se puede desactivar la oficina porque está asignada a usuarios"
         )
 
     existing_office.is_active = False
@@ -114,4 +114,4 @@ def deactivate_office(office_id: int, db: Session = Depends(get_db), current_use
         return existing_office
     except Exception:
         db.rollback()
-        raise HTTPException(status_code=500, detail="Failed to deactivate office")
+        raise HTTPException(status_code=500, detail="Fallo al desactivar la oficina")

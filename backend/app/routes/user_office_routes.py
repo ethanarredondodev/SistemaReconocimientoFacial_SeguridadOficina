@@ -16,6 +16,7 @@ router = APIRouter(
 
 @router.post("/", response_model=UserOfficeResponse)
 def create_user_office(user_office: UserOfficeCreate, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+    print("user:", user_office.user_id, "office:", user_office.office_id)
     existing_user = db.query(User).filter(
         User.id == user_office.user_id,
         User.is_active == True

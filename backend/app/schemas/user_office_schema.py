@@ -4,8 +4,8 @@ from app.schemas.office_schema import OfficeResponse
 
 class UserOfficeResponse(BaseModel):
     id: int
-    user_id: UserResponse
-    office_id: OfficeResponse
+    user: UserResponse
+    office: OfficeResponse
 
     class Config:
         from_attributes = True

@@ -47,7 +47,7 @@ def verify_access(
     if not office:
         raise HTTPException(
             status_code=404,
-            detail="Office not found"
+            detail="Oficina no encontrada"
         )
 
     result = recognize_face(uploaded_image=image, db=db)
@@ -84,7 +84,7 @@ def verify_access(
     except Exception as e:
         db.rollback()
         print("ERROR DB:", e)
-        raise HTTPException(status_code=500, detail="Error logging access attempt")
+        raise HTTPException(status_code=500, detail="Error al registrar el intento de acceso")
 
     return FaceAccessResponse(
         access_result=access_result,

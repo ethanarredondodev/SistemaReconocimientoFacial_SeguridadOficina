@@ -4,6 +4,7 @@ class OfficeResponse(BaseModel):
     id: int
     name: str
     description: str | None
+    is_active: bool
 
     class Config:
         from_attributes = True

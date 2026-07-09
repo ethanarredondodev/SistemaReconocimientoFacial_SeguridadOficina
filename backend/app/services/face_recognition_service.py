@@ -50,16 +50,6 @@ def recognize_face(uploaded_image, db: Session):
 
         confidence = float(round((1 - best_distance) * 100, 2))
 
-        print(
-            f"User: {best_user.full_name}"
-        )
-        print(
-            f"Distance: {best_distance}"
-        )
-        print(
-            f"Confidence: {confidence}"
-        )
-
         return {"user": best_user, "confidence": confidence}
 
     finally:

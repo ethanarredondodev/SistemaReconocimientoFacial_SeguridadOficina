@@ -30,7 +30,7 @@ def login(
     if not user:
         raise HTTPException(
             status_code=401,
-            detail="Invalid credentials"
+            detail="Credenciales inválidas"
         )
 
     if not verify_password(
@@ -39,7 +39,7 @@ def login(
     ):
         raise HTTPException(
             status_code=401,
-            detail="Invalid credentials"
+            detail="Credenciales inválidas"
         )
     
     access_token = create_access_token(
@@ -52,7 +52,8 @@ def login(
 
     return {
         "access_token": access_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "user": user
     }
 
 
