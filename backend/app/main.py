@@ -20,6 +20,7 @@ from app.routes.access_log_routes import router as access_log_router
 
 from app.routes.dashboard_routes import router as dashboard_router
 from app.routes.face_access_routes import router as face_access_router
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(
     title="COMPRAFACIL ACCESS API",
@@ -44,6 +45,7 @@ app.add_middleware(
     allow_headers=["*"],  # Permite todos los encabezados
 )
 
+app.mount("/storage", StaticFiles(directory="storage"), name="storage")
 
 @app.get("/")
 def root():

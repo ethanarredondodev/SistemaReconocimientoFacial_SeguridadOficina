@@ -14,6 +14,8 @@ from fastapi import (
 )
 
 from sqlalchemy.orm import Session
+import uuid
+import os
 
 from app.database import get_db
 
@@ -70,11 +72,21 @@ def verify_access(
 
     access_result = "PERMITIDO" if (user and permission) else "DENEGADO"
 
+    # Guardar captura solo si es desconocido
+    capture_path = None
+    if not user:
+        os.makedirs("storage/captures", exist_ok=True)
+        capture_path = f"storage/captures/unknown_{uuid.uuid4().hex[:8]}.jpg"
+        image.file.seek(0)  # rebobinar porque recognize_face ya lo leyó
+        with open(capture_path, "wb") as f:
+            f.write(image.file.read())
+
     log = AccessLog(
         user_id=user.id if user else None,
         office_id=office_id,
         access_result=access_result,
-        confidence=float(confidence)
+        confidence=float(confidence),
+        capture_image=capture_path
     )
 
     try:
@@ -97,4 +109,4 @@ def verify_access(
             id=office.id,
             name=office.name
         ) if office else None
-)
+    )

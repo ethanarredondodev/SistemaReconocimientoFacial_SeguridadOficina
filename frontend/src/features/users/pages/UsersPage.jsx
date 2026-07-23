@@ -125,25 +125,33 @@ const UsersPage = () => {
                             users.map((user) => (
                                 <tr key={user.id} style={{ borderBottom: "1px solid #f9f9f9" }}>
                                     <td style={{ padding: "14px 20px" }}>
-                                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                        <div style={{ width: "36px", height: "36px", borderRadius: "50%", overflow: "hidden", flexShrink: 0 }}>
+                                            {user.face_image ? (
+                                                <img
+                                                    src={`http://localhost:8000/${user.face_image}`}
+                                                    alt={user.full_name}
+                                                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                                    onError={(e) => {
+                                                        // Si la imagen no carga, muestra la inicial
+                                                        e.target.style.display = "none";
+                                                        e.target.nextSibling.style.display = "flex";
+                                                    }}
+                                                />
+                                            ) : null}
                                             <div style={{
                                                 width: "36px",
                                                 height: "36px",
                                                 borderRadius: "50%",
                                                 background: "#4f6ef7",
-                                                display: "flex",
+                                                display: user.face_image ? "none" : "flex",
                                                 alignItems: "center",
                                                 justifyContent: "center",
                                                 color: "white",
                                                 fontWeight: "600",
-                                                fontSize: "14px",
-                                                flexShrink: 0
+                                                fontSize: "14px"
                                             }}>
                                                 {user.full_name?.charAt(0).toUpperCase()}
                                             </div>
-                                            <span style={{ fontSize: "14px", color: "#1e1e2e", fontWeight: "500" }}>
-                                                {user.full_name}
-                                            </span>
                                         </div>
                                     </td>
                                     <td style={{ padding: "14px 20px", fontSize: "14px", color: "#555" }}>

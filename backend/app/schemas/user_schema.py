@@ -7,6 +7,7 @@ class UserResponse(BaseModel):
     full_name: str
     email: EmailStr
     role: RoleResponse
+    face_image: str | None = None
     is_active: bool
 
     class Config:

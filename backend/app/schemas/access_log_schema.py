@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 from datetime import datetime
 from app.schemas.user_schema import UserResponse
@@ -8,6 +10,8 @@ class AccessLogResponse(BaseModel):
     access_result: str
     confidence: float
     access_time: datetime
+    capture_image: Optional[str] = None  # ← agregar
+
 
     user: UserResponse | None
     office: OfficeResponse
