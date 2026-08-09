@@ -2,7 +2,6 @@ backend/.env
 backend/venv
 backend/__pycache__
 backend/**/*.pyc
-backend/alembic/*
 backend/storage/*
 
 frontend/node_modules
